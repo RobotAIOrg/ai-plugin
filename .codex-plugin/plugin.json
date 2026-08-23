@@ -1,0 +1,45 @@
+{
+  "name": "i118-phone-assistant",
+  "version": "1.0.0",
+  "description": "View phone orders and order details for your i118 organizations in ChatGPT and Codex.",
+  "author": {
+    "name": "i118.ai",
+    "url": "https://i118.ai"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://i118.ai",
+  "skills": "./skills/",
+  "mcpServers": {
+    "i118": {
+      "type": "http",
+      "url": "https://mcp.i118.ai/mcp"
+    }
+  },
+  "keywords": [
+    "i118",
+    "phone-assistant",
+    "orders",
+    "order-automation"
+  ],
+  "interface": {
+    "displayName": "i118 Phone Assistant",
+    "shortDescription": "View i118.ai phone orders.",
+    "longDescription": "View i118.ai phone orders, customer requests, and order details.",
+    "developerName": "i118.ai",
+    "category": "Productivity",
+    "capabilities": [
+      "Read"
+    ],
+    "websiteURL": "https://i118.ai",
+    "privacyPolicyURL": "https://docs.i118.ai/en/privacy-policy",
+    "termsOfServiceURL": "https://docs.i118.ai/en/terms-of-service",
+    "defaultPrompt": [
+      "Show my newest phone orders.",
+      "Check my i118 Phone Assistant connection.",
+      "Review all new i118 Phone Assistant orders and summarize the next steps."
+    ],
+    "brandColor": "#4F46E5",
+    "composerIcon": "./assets/i118-logo-square.png",
+    "logo": "./assets/i118-logo-square.png"
+  }
+}

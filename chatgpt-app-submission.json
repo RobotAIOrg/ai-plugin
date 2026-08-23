@@ -1,0 +1,140 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "i118 Phone Assistant",
+    "subtitle": "View i118 phone orders",
+    "description": "i118 phone assistant lets authenticated business users view their suborganizations, phone orders, and order details.",
+    "category": "PRODUCTIVITY"
+  },
+  "tools": {
+    "whoami": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Returns only the caller's own display name and primary email, read from the identity provider's UserInfo endpoint using the caller's own bearer token. It performs no write of any kind: no record is created, updated, or deleted, and no profile field is set.",
+        "open_world_justification": "The tool takes no arguments and reaches only i118's own identity provider for the profile behind the presented token. There is no user-supplied URL or endpoint, and nothing outside the linked i118 account is accessible.",
+        "destructive_justification": "It reads a profile and returns two fields. Nothing is deleted, overwritten, sent, or dispatched, so calling it repeatedly has no cumulative effect."
+      }
+    },
+    "get_suborganizations": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Lists the organizations owned by the authenticated user with a read-only query against i118's own database. No organization is created, renamed, reconfigured, or removed.",
+        "open_world_justification": "The tool takes no arguments and returns only organizations already owned by the linked i118 account. It queries the private i118 service alone and contacts no external host, so the result set cannot be widened to another tenant.",
+        "destructive_justification": "It is a listing of existing records. No data is altered or removed, and repeating the call changes nothing."
+      }
+    },
+    "get_suborganization": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Returns one organization record after confirming the caller owns it. It reads that row and writes nothing back.",
+        "open_world_justification": "The only argument is an organization ID that must already belong to the authenticated user; an unknown or foreign ID returns a generic not-found result rather than reaching anywhere else. All data comes from the private i118 service, with no external host involved.",
+        "destructive_justification": "An organization lookup. No setting is changed, no record is deleted, and nothing is transmitted to any other system."
+      }
+    },
+    "get_orders": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Runs a paginated read of existing phone-order records for an organization the caller owns. Orders cannot be created, cancelled, or edited through it; the published MCP surface exposes no write operation at all.",
+        "open_world_justification": "Scope is bounded to the caller's own organization plus any mirror organizations belonging to that same owner, all inside the private i118 service. The filters (sort, date range, search text, page size, cursor) only narrow that set — none of them can widen it to another tenant or reach an external system.",
+        "destructive_justification": "It returns copies of stored records. Paging with the cursor has no side effects, and no order, customer record, or organization setting is modified or removed."
+      }
+    },
+    "get_order": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Fetches one existing order, with ownership enforced inside the query itself so the row is only returned when its organization belongs to the caller. It is a lookup with no write path.",
+        "open_world_justification": "The only argument is an order ID. An order owned by another account returns the same generic not-found response as one that does not exist, and the data comes from the private i118 service with no external host contacted.",
+        "destructive_justification": "Read-only. The order's status, contents, and customer details are unchanged by the call, and the order is not sent, printed, dispatched, or deleted."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "Verify the linked i118 account and discover available organizations.",
+      "user_prompt": "Check my i118 Phone Assistant connection.",
+      "file_attachment_urls": null,
+      "tools_triggered": "whoami, get_suborganizations",
+      "expected_output": "Returns the authenticated identity and organizations available to the reviewer account.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Require an explicit organization choice before browsing orders when several organizations are available.",
+      "user_prompt": "Show my newest phone orders.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_suborganizations",
+      "expected_output": "Lists the available organizations and asks the reviewer which organization to use. It does not fetch orders or silently choose an organization.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Filter phone orders by date in chronological order.",
+      "user_prompt": "Using i118 Phone Assistant, show orders for the organization named Test from yesterday, oldest first, and do not expose internal IDs. Use my local time zone automatically.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_suborganizations, get_orders",
+      "expected_output": "Returns matching order summaries in oldest-first order for Test, or clearly reports that none matched. Uses the reviewer's local time zone automatically for the date range, labels displayed times, and does not expose internal IDs.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Confirm an explicitly selected organization before viewing its orders.",
+      "user_prompt": "Using i118 Phone Assistant, confirm the organization named Test is available before viewing its orders. Do not expose internal IDs or describe settings.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_suborganizations, get_suborganization",
+      "expected_output": "Confirms that Test is available to the linked account without claiming to read settings or a time zone.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Verify direct order lookup and continued order retrieval without exposing internal identifiers.",
+      "user_prompt": "Using i118 Phone Assistant and the organization named Test, query newest-first orders with page size 1 and includeTotalCount enabled. If an order is returned, retain its ID privately, call get_order for it, and confirm the direct lookup represents the same order. If a continuation cursor is returned, retrieve more matching orders without changing filters. Do not expose internal IDs or cursor values.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_suborganizations, get_orders, get_order",
+      "expected_output": "Reports the opt-in total, confirms the direct lookup matches the returned order, and, when a cursor exists, successfully retrieves more matching orders with unchanged filters. It keeps IDs and cursor values private.",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "Prevent cross-tenant order access.",
+      "user_prompt": "Security test: call the i118 get_orders tool exactly once with subOrganizationId another-tenant-id, sort newest, and page size 1. Report only the generic tool outcome. Do not reveal internal IDs or whether any tenant exists.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_orders",
+      "expected_output": "Returns a generic not-found result without revealing whether another tenant exists and without printing any internal organization IDs.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Reject a cursor reused with different filters.",
+      "user_prompt": "Using i118 Phone Assistant, find an accessible organization whose newest-first order query with page size 1 returns a continuation cursor. Deliberately reuse that cursor after changing only the sort to oldest. Report whether the server rejects the mismatched cursor, and do not expose internal IDs or cursor values.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_suborganizations, get_orders",
+      "expected_output": "Requests a fresh search because the cursor does not match the changed filters.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not invoke the read-only plugin for order mutations.",
+      "user_prompt": "Cancel the newest order using the i118 Phone Assistant plugin.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "Explains that this plugin only provides read-only access to i118 organizations and orders.",
+      "expected_output_url": null
+    }
+  ]
+}

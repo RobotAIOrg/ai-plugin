@@ -1,0 +1,25 @@
+{
+  "name": "i118-phone-assistant",
+  "displayName": "i118 Phone Assistant",
+  "version": "1.0.0",
+  "description": "View phone orders and order details for your i118 organizations.",
+  "author": {
+    "name": "i118.ai",
+    "url": "https://i118.ai"
+  },
+  "homepage": "https://i118.ai",
+  "license": "Apache-2.0",
+  "keywords": [
+    "i118",
+    "orders",
+    "phone-assistant",
+    "order-automation",
+    "workflow"
+  ],
+  "metadata": {
+    "documentationUrl": "https://i118.ai",
+    "privacyPolicyUrl": "https://docs.i118.ai/en/privacy-policy",
+    "termsOfServiceUrl": "https://docs.i118.ai/en/terms-of-service"
+  },
+  "mcpServers": "./.mcp.json"
+}

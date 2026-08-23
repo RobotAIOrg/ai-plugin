@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "i118": {
+      "type": "http",
+      "url": "https://mcp.i118.ai/mcp"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+name: Validate plugin
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Claude Code
+        run: npm install --global @anthropic-ai/claude-code@2.1.238
+
+      - name: Validate Claude plugin
+        run: claude plugin validate . --strict
+
+      - name: Check state engine syntax
+        run: node --check skills/i118-order-routine/scripts/state_engine.js
+
+      - name: Run plugin regression tests
+        run: node --test tests/state_engine.test.js tests/plugin_manifest.test.js
